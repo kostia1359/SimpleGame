@@ -6,9 +6,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="/styles/reset.css">
   <link rel="stylesheet" href="/styles/common.css">
+  <link rel="stylesheet" href="/styles/rooms.css">
   <link
-    href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;0,800;1,300;1,400;1,600;1,700;1,800&display=swap"
-    rel="stylesheet">
+          href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;0,800;1,300;1,400;1,600;1,700;1,800&display=swap"
+          rel="stylesheet">
   <script src="/socket.io/socket.io.js"></script>
   <script defer type="module" src="/javascript/game.mjs"></script>
   <title>Game</title>
@@ -18,11 +19,22 @@
   <div id="root">
     <div id="rooms-page" class="full-screen">
       Rooms Page
+      <div class="createButton">
+        <button id="createRooms">Create Room</button>
+      </div>
+      <div class="gameCards" id="roomsWrapper">
+        <div class="room">
+          <div class="roomUsers">0 user connected</div>
+          <div class="roomName">Name</div>
+          <button class="joinButton">Join</button>
+        </div>
+
+      </div>
+
     </div>
     <div id="game-page" class="full-screen display-none">
       Game Page
     </div>
   </div>
 </body>
-
 </html>

@@ -1,7 +1,7 @@
 import express from "express";
 import http from "http";
 import socketIO from "socket.io";
-import socketHandler from "./socket";
+import socketHandler from "./dist/socket/index";
 import routes from "./routes";
 import { STATIC_PATH, PORT } from "./config";
 

@@ -1,0 +1,40 @@
+.createButton button{
+    margin: 10px;
+    padding: 5px;
+    border: 2px black solid;
+}
+
+.gameCards{
+    display: flex;
+    height: 90%;
+    flex-wrap: wrap;
+
+}
+
+.room{
+    border: 1px black solid;
+    margin: 10px;
+    height: 250px;
+    width: 250px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.room .roomUsers{
+    align-self: start;
+    justify-self: start;
+}
+
+.room .joinButton{
+    margin-bottom: 30px;
+    background: deepskyblue;
+    padding: 5px 15px;
+    border: 1px solid blue;
+}
+
+.room .roomName{
+    font-size: 20px;
+    font-weight: bold;
+}
