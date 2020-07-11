@@ -34,6 +34,7 @@ export default (io: Server) => {
             rooms.get(roomName)!.push(username);
             socket.join(roomName);
 
+            socket.emit('JOIN_ROOM_DONE', roomName)
             io.emit('UPDATE_ROOMS', generateArray(rooms))
         })
 
@@ -44,8 +45,9 @@ export default (io: Server) => {
             if(rooms.get(roomName)!.length===0){
                 rooms.delete(roomName);
             }
+
+            io.emit('UPDATE_ROOMS', generateArray(rooms))
         })
 
-        io.emit('UPDATE_ROOMS', generateArray(rooms))
     });
 };

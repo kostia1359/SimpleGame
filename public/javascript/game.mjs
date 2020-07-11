@@ -1,4 +1,15 @@
-import {createElement} from "./domHelper";
+export function createElement({ tagName, className, attributes = {} }) {
+  const element = document.createElement(tagName);
+
+  if (className) {
+    const classNames = className.split(' ').filter(Boolean);
+    element.classList.add(...classNames);
+  }
+
+  Object.keys(attributes).forEach((key) => element.setAttribute(key, attributes[key]));
+
+  return element;
+}
 
 const username = sessionStorage.getItem("username");
 
@@ -10,7 +21,7 @@ const socket = io("", { query: { username } });
 
 const roomNames=[];//changing while updating
 const createRoomButton=document.getElementById('createRooms');
-const roomContainer=document.getElementById('rooms-page');
+const roomContainer=document.getElementById('roomsWrapper');
 
 
 const createRoom=()=>{
@@ -22,16 +33,19 @@ const createRoom=()=>{
   }
 
   socket.emit('JOIN_ROOM', roomName)
+  roomContainer.style.display='none';
 }
 
 function createRooms(rooms){
-  const allRooms=rooms.map(createRoomCard);
-  roomContainer.append(...allRooms);
+  console.log(rooms);
 
+  const allRooms=rooms.map(createRoomCard);
+  roomContainer.innerHTML="";
+  roomContainer.append(...allRooms);
 }
 
 function joinRoomDone(roomName){
-  roomContainer.innerText=`you are in ${roomName}`
+  alert(`you are in ${roomName}`)
 }
 
 createRoomButton.addEventListener('click',createRoom);
@@ -71,6 +85,9 @@ function createRoomCard(room) {
     roomContainer.style.display='none';
     //redirect to game
   })
+  joinButton.innerText="Join";
 
+  roomElement.append(roomUsers, roomNameElement, joinButton);
+  console.log(roomElement)
   return roomElement;
 }
