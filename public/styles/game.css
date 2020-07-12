@@ -1,0 +1,80 @@
+#game-page{
+    display: flex;
+    flex-direction: row;
+    padding: 20px;
+}
+
+#game-page button{
+    background: #d3d3d3;
+    border: #888888 1px solid;
+}
+
+.gameBlock{
+    height: 400px;
+    width:400px;
+    border: 1px black solid;
+    margin-left: 50px;
+    padding: 20px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.informationBlock{
+    display: flex;
+    flex-direction: column;
+}
+
+.returnButton{
+    margin: 20px 0;
+    padding: 10px 20px;
+    align-self: self-start;
+}
+
+.readyButton{
+    font-size: 25px;
+    padding: 30px 80px;
+}
+
+.gameName{
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.gameUsersWrapper{
+    display: flex;
+    flex-direction: column;
+}
+
+.gameUser{
+    display: flex;
+    flex-direction: column;
+    margin: 5px 0;
+}
+
+.gameUser .userScale{
+    margin-top: 3px;
+    width: 200px;
+    height: 20px;
+    border: 1px solid black;
+}
+
+.gameUser .userName::before{
+    content: ' ';
+    height: 10px;
+    width: 10px;
+    background: red;
+    border-radius: 50%;
+    display: inline-block;
+
+    margin-right: 5px;
+}
+
+.gameUser .userName.ready::before{
+    background: #c7fc00;
+}
+
+.gameUser .userName.you::after{
+    content: ' (you)';
+}

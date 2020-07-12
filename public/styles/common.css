@@ -23,6 +23,7 @@
   user-select: none;
 }
 
+#game-page.display-none,
 .display-none {
   display: none;
 }

@@ -20,9 +20,20 @@ if (!username) {
 const socket = io("", { query: { username } });
 
 const roomNames=[];//changing while updating
-const createRoomButton=document.getElementById('createRooms');
+let activeRoomName='';
+const userContainer=document.querySelector('#game-page .gameUsersWrapper');
 const roomContainer=document.getElementById('roomsWrapper');
+const rooms=document.getElementById('rooms-page');
+const game=document.getElementById('game-page');
 
+const socketRoomEvents=new Map();
+socketRoomEvents.set("UPDATE_ROOMS", createRooms);
+socketRoomEvents.set("JOIN_ROOM_DONE", joinRoomDone);
+
+const socketGameEvents=new Map();
+socketGameEvents.set('PLAYER_STATUS_UPDATE', changePlayersStatus);
+socketGameEvents.set('PLAYER_LEFT', deletePlayer);
+socketGameEvents.set('PLAYER_JOINED', addPlayer);
 
 const createRoom=()=>{
   const roomName=prompt('input room name:');
@@ -33,27 +44,38 @@ const createRoom=()=>{
   }
 
   socket.emit('JOIN_ROOM', roomName)
-  roomContainer.style.display='none';
 }
 
 function createRooms(rooms){
-  console.log(rooms);
-
+  roomNames.splice(0,roomNames.length);
   const allRooms=rooms.map(createRoomCard);
   roomContainer.innerHTML="";
   roomContainer.append(...allRooms);
 }
 
-function joinRoomDone(roomName){
-  alert(`you are in ${roomName}`)
+function joinRoomDone(room){
+  activeRoomName=room.name;
+  setSocketSubscriptions(socketGameEvents);
+  hideAndShowElement(rooms,game);
+  const {name:roomName, online}=room;
+
+  game.querySelector('.gameName').innerText=roomName;
+  userContainer.innerHTML='';
+
+  const users=online.map(user=> createUser(user.username));
+  userContainer.append(...users);
+  const socketOwner=findPlayer(username);
+  console.log(socketOwner);
+  socketOwner.classList.add('you');
+  online.forEach(user=>changePlayersStatus(user));
+
 }
 
-createRoomButton.addEventListener('click',createRoom);
-socket.on("UPDATE_ROOMS", createRooms);
-socket.on("JOIN_ROOM_DONE", joinRoomDone);
+setSocketSubscriptions(socketRoomEvents);
 
 function createRoomCard(room) {
-  const {online:activeUsersAmount, name:roomName}=room;
+  const activeUsersAmount=room.online.length;
+  const roomName=room.name;
   roomNames.push(roomName);
 
   const roomElement=createElement({
@@ -82,12 +104,114 @@ function createRoomCard(room) {
 
   joinButton.addEventListener('click',()=>{
     socket.emit('JOIN_ROOM', roomName);
-    roomContainer.style.display='none';
-    //redirect to game
   })
   joinButton.innerText="Join";
 
   roomElement.append(roomUsers, roomNameElement, joinButton);
-  console.log(roomElement)
   return roomElement;
+}
+
+function createUser(userName) {
+
+  const userElement=createElement({
+    tagName:'div',
+    className:'gameUser'
+  })
+
+  const userNameElement=createElement({
+        tagName:'div',
+        className:'userName'
+      });
+  userNameElement.innerText=userName;
+
+  const userScale=createElement({
+    tagName:'div',
+    className:'userScale'
+  })
+
+  userElement.append(userNameElement,userScale);
+  return userElement;
+}
+
+function hideAndShowElement(elementToHide, elementToShow) {
+  elementToHide.classList.add('display-none');
+  elementToShow.classList.remove('display-none');
+}
+
+(function createEventListeners() {
+  const returnButton=document.querySelector('#game-page .returnButton');
+  returnButton.addEventListener('click', returnButtonEvent);
+
+  const readyButton=document.querySelector('#game-page .readyButton');
+  readyButton.addEventListener('click',readyButtonEvent);
+
+  const notReadyButton=document.querySelector('#game-page .readyButton.display-none');
+  notReadyButton.addEventListener('click',notReadyButtonEvent);
+
+  const createRoomButton=document.getElementById('createRooms');
+  createRoomButton.addEventListener('click',createRoom);
+
+  function readyButtonEvent(){
+    socket.emit("PLAYER_READY", activeRoomName);
+
+    const user={username,isReady:true}
+    changePlayersStatus(user);
+    document.querySelector('.returnButton').classList.add('display-none');
+    hideAndShowElement(readyButton,notReadyButton);
+  }
+  function notReadyButtonEvent() {
+    socket.emit("PLAYER_NOT_READY", activeRoomName);
+
+    const user={username,isReady:false}
+    changePlayersStatus(user);
+    document.querySelector('.returnButton').classList.remove('display-none');
+    hideAndShowElement(notReadyButton,readyButton);
+  }
+  function returnButtonEvent() {
+    if(activeRoomName===''||!activeRoomName) throw `${activeRoomName}`;
+    socket.emit("LEAVE_ROOM", activeRoomName);
+
+    activeRoomName='';
+    removeSocketSubscriptions(socketGameEvents);
+    hideAndShowElement(game,rooms);
+  }
+})();
+
+function findPlayer(userName) {
+  const players=Array.from(document.querySelectorAll('#game-page .gameUser .userName'));
+
+  return players.filter(player=>player.innerText===userName)[0];
+}
+
+function changePlayersStatus(user) {
+  const {username:userName, isReady}=user;
+  const player=findPlayer(userName);
+
+  if(isReady){
+    player.classList.add('ready');
+  }else {
+    player.classList.remove('ready');
+  }
+}
+
+function deletePlayer(userName) {
+  const player=findPlayer(userName);
+
+  player.parentNode.parentNode.removeChild(player.parentNode);
+}
+
+function setSocketSubscriptions(subscriptionMap) {
+  subscriptionMap.forEach((fn,event)=>{
+    socket.on(event,fn);
+  })
+}
+
+function removeSocketSubscriptions(subscriptionMap) {
+  subscriptionMap.forEach((fn,event)=>{
+    socket.off(event,fn);
+  })
+}
+
+function addPlayer(userName) {
+  userContainer.append(createUser(userName));
 }

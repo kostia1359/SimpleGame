@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="/styles/reset.css">
   <link rel="stylesheet" href="/styles/common.css">
   <link rel="stylesheet" href="/styles/rooms.css">
+  <link rel="stylesheet" href="/styles/game.css">
   <link
           href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;0,800;1,300;1,400;1,600;1,700;1,800&display=swap"
           rel="stylesheet">
@@ -28,8 +29,33 @@
 
     </div>
     <div id="game-page" class="full-screen display-none">
-      Game Page
+      <div class="informationBlock">
+        <div class="gameName">Room Name #1</div>
+        <button class="returnButton">Back To Rooms</button>
+        <div class="gameUsersWrapper">
+          <div class="gameUser">
+            <div class="userName">userName</div>
+            <div class="userScale"></div>
+          </div>
+          <div class="gameUser">
+            <div class="userName">userName</div>
+            <div class="userScale"></div>
+          </div>
+          <div class="gameUser">
+            <div class="userName">userName</div>
+            <div class="userScale"></div>
+          </div>
+        </div>
+      </div>
+      <div class="gameBlock">
+        <div class="gameContentBlock">
+          <button class="readyButton">READY</button>
+          <button class="readyButton display-none">NOT READY</button>
+
+        </div>
+      </div>
     </div>
+
   </div>
 </body>
 </html>
