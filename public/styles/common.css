@@ -24,6 +24,7 @@
 }
 
 #game-page.display-none,
+#rooms-page .room.display-none,
 .display-none {
   display: none;
 }

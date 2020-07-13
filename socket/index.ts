@@ -4,7 +4,7 @@ import {IUser} from "../types/user";
 import {Server, Socket} from "socket.io";
 import {texts} from "../data";
 
-
+const usernames:string[]=[];
 const rooms: Map<string, IUser[]> = new Map();
 const timers: Map<string, NodeJS.Timeout>=new Map();
 const generateArray = (roomsMap: Map<string, IUser[]>): IRoom[] => {
@@ -48,6 +48,14 @@ const textsSize=texts.length;
 export default (io: Server) => {
     io.on('connection', (socket: Socket) => {
         const username:string = socket.handshake.query.username;
+        let isUsernameValid=false;
+
+        if(usernames.indexOf(username)!==-1){
+            socket.emit('BAD_USERNAME');
+        }else{
+            usernames.push(username);
+            isUsernameValid=true;
+        }
 
         socket.emit('UPDATE_ROOMS', generateArray(rooms));
 
@@ -56,15 +64,24 @@ export default (io: Server) => {
                 rooms.set(roomName, [])
             }
             rooms.get(roomName)!.push({username,isReady:false, progress:0});
+
             socket.join(roomName);
 
             socket.emit('JOIN_ROOM_DONE', {name:roomName,online:rooms.get(roomName)})
             io.emit('UPDATE_ROOMS', generateArray(rooms));
             socket.to(roomName).emit('PLAYER_JOINED', username);
+
+            if(rooms.get(roomName)!.length===config.MAXIMUM_USERS_FOR_ONE_ROOM){
+                io.emit('HIDE_ROOM', roomName)
+            }
         })
 
         socket.on('LEAVE_ROOM', (roomName:string):void=>{
             socket.to(roomName).emit('PLAYER_LEFT', username);
+
+            if(rooms.get(roomName)!.length===config.MAXIMUM_USERS_FOR_ONE_ROOM-1){
+                io.emit('SHOW_ROOM', roomName)
+            }
 
             leaveFromRoom(roomName);
         })
@@ -77,6 +94,8 @@ export default (io: Server) => {
             if(isRoomReady(roomName)){
                 let bigTimer=config.SECONDS_TIMER_BEFORE_START_GAME;
                 let gameTimer=config.SECONDS_FOR_GAME;
+
+                io.emit('HIDE_ROOM', roomName)
                 io.in(roomName).emit('BIG_TIMER',bigTimer);
                 io.in(roomName).emit('TEXT_NUMBER',getRandomInt(textsSize));
 
@@ -91,6 +110,11 @@ export default (io: Server) => {
                             io.in(roomName).emit('GAME_TIMER',gameTimer);
                             if(gameTimer===0){
                                 io.in(roomName).emit('GAME_FINISHED', rooms.get(roomName));
+
+                                if(rooms.get(roomName)!.length!==config.MAXIMUM_USERS_FOR_ONE_ROOM){
+                                    io.emit('SHOW_ROOM', roomName)
+                                }
+
                                 clearInterval(gameTimerId)
                             }
                         },1000)
@@ -128,16 +152,23 @@ export default (io: Server) => {
                 timers.delete(roomName);
 
                 io.in(roomName).emit('GAME_FINISHED', users);
+
+                if(rooms.get(roomName)!.length!==config.MAXIMUM_USERS_FOR_ONE_ROOM){
+                    io.emit('SHOW_ROOM', roomName)
+                }
             }
         });
 
         socket.on('disconnect',()=>{
+            if(!isUsernameValid) return;
             rooms.forEach((users,roomName)=>{
                 if(findUserIndex(username, roomName)!==-1){
                     socket.to(roomName).emit('PLAYER_LEFT', username);
                     leaveFromRoom(roomName);
                 }
             })
+
+            usernames.splice(usernames.indexOf(username),1);
         })
         function leaveFromRoom(roomName:string):void {
             deleteUserFromRoom(roomName,username);
@@ -158,11 +189,11 @@ export default (io: Server) => {
 
             return unReady.length===0;
         }
-        function setNextWinner(roomname:string):void {
-            const users=rooms.get(roomname)!;
+        function setNextWinner(roomName:string):void {
+            const users=rooms.get(roomName)!;
             const notFinished=users.filter(user=>user.progress>-1);
 
-            const currentWinner=findUser(username,roomname);
+            const currentWinner=findUser(username,roomName);
 
             currentWinner.progress=notFinished.length-users.length-1;
 

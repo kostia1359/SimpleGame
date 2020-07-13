@@ -1,15 +1,4 @@
-function createElement({ tagName, className, attributes = {} }) {
-  const element = document.createElement(tagName);
-
-  if (className) {
-    const classNames = className.split(' ').filter(Boolean);
-    element.classList.add(...classNames);
-  }
-
-  Object.keys(attributes).forEach((key) => element.setAttribute(key, attributes[key]));
-
-  return element;
-}
+import {createElement} from "./helpers/domHelper.mjs";
 
 const username = sessionStorage.getItem("username");
 
@@ -31,8 +20,11 @@ const rooms=document.getElementById('rooms-page');
 const game=document.getElementById('game-page');
 
 const socketRoomEvents=new Map();
+socketRoomEvents.set("BAD_USERNAME", badUserName);
 socketRoomEvents.set("UPDATE_ROOMS", createRooms);
 socketRoomEvents.set("JOIN_ROOM_DONE", joinRoomDone);
+socketRoomEvents.set("HIDE_ROOM", hideRoom);
+socketRoomEvents.set("SHOW_ROOM", showRoom);
 
 const socketGameEvents=new Map();
 socketGameEvents.set('PLAYER_STATUS_UPDATE', changePlayersStatus);
@@ -325,6 +317,35 @@ function updateBars(users) {
   })
 }
 
+function badUserName() {
+  alert('this userName is already in use');
+  removeSocketSubscriptions(socketRoomEvents);
+  sessionStorage.removeItem("username");
+  window.location.replace("/login");
+}
+
 function finishGame(users) {
   console.log(users)
 }
+
+function findRoom(roomName) {
+  const rooms=Array.from(roomContainer.getElementsByClassName('room'));
+
+  for(let room of rooms){
+    const name=room.getElementsByClassName('roomName')[0].innerText;
+
+    if(roomName===name) return room;
+  }
+}
+
+function hideRoom(roomName) {
+  console.log('hiding');
+  findRoom(roomName).classList.add('display-none');
+}
+
+function showRoom(roomName) {
+  console.log('showing');
+
+  findRoom(roomName).classList.remove('display-none');
+}
+
