@@ -1,4 +1,4 @@
-export function createElement({ tagName, className, attributes = {} }) {
+function createElement({ tagName, className, attributes = {} }) {
   const element = document.createElement(tagName);
 
   if (className) {
@@ -19,8 +19,12 @@ if (!username) {
 
 const socket = io("", { query: { username } });
 
-const roomNames=[];//changing while updating
 let activeRoomName='';
+let text;
+let keyboardHandler;
+
+
+const roomNames=[];//changing while updating
 const userContainer=document.querySelector('#game-page .gameUsersWrapper');
 const roomContainer=document.getElementById('roomsWrapper');
 const rooms=document.getElementById('rooms-page');
@@ -34,6 +38,12 @@ const socketGameEvents=new Map();
 socketGameEvents.set('PLAYER_STATUS_UPDATE', changePlayersStatus);
 socketGameEvents.set('PLAYER_LEFT', deletePlayer);
 socketGameEvents.set('PLAYER_JOINED', addPlayer);
+socketGameEvents.set('BIG_TIMER', bigTimer);
+socketGameEvents.set('TEXT_NUMBER', getText);
+socketGameEvents.set('GAME_TIMER', smallTimer);
+socketGameEvents.set('UPDATE_BARS', updateBars);
+socketGameEvents.set('GAME_FINISHED', finishGame);
+
 
 const createRoom=()=>{
   const roomName=prompt('input room name:');
@@ -65,7 +75,6 @@ function joinRoomDone(room){
   const users=online.map(user=> createUser(user.username));
   userContainer.append(...users);
   const socketOwner=findPlayer(username);
-  console.log(socketOwner);
   socketOwner.classList.add('you');
   online.forEach(user=>changePlayersStatus(user));
 
@@ -129,6 +138,12 @@ function createUser(userName) {
     className:'userScale'
   })
 
+  const userSuccessIndicator=createElement({
+    tagName:'div',
+    className:'successIndicator'
+  });
+
+  userScale.append(userSuccessIndicator);
   userElement.append(userNameElement,userScale);
   return userElement;
 }
@@ -214,4 +229,102 @@ function removeSocketSubscriptions(subscriptionMap) {
 
 function addPlayer(userName) {
   userContainer.append(createUser(userName));
+}
+
+function bigTimer(timer) {
+  const timerElement=document.querySelector('#game-page .bigTimer');
+  const notReadyButton=document.getElementsByClassName('readyButton')[1];
+
+  if(!notReadyButton.classList.contains('display-none')){
+    hideAndShowElement(notReadyButton, timerElement);
+  }
+
+  timerElement.innerText=timer.toString();
+
+  if(Number(timer)===0){
+    startGame();
+  }
+}
+
+function getText(textNumber) {
+  fetch(`http://localhost:3003/game/texts/${textNumber}`).then(res=>res.json()).then(res=>{
+    text=res.text;
+  })
+}
+
+function addGameEventListeners() {
+  let textPosition = 0;
+
+  const textElement = document.getElementsByClassName('text')[0];
+
+  const unCompletedTextElement = document.getElementsByClassName('unCompletedText')[0]
+  const completedTextElement = textElement.getElementsByClassName('completedText')[0]
+  const decoratedTextElement = textElement.getElementsByClassName('decoratedText')[0]
+
+  decoratedTextElement.innerText = text[0];
+  unCompletedTextElement.innerText = text.slice(1);
+
+  keyboardHandler=function (keyEvent) {
+    if (keyEvent.repeat) return;
+    if (keyEvent.key.toLowerCase() === text[textPosition].toLowerCase()) {
+      socket.emit('SUCCESSFUL_LETTER', activeRoomName)
+      let typedLetter = decoratedTextElement.innerText === '\xa0' ? ' ' : decoratedTextElement.innerText;
+      decoratedTextElement.innerText = text[textPosition + 1] === ' ' ? '\xa0' : text[textPosition + 1];
+
+      if(decoratedTextElement.innerText==='undefined'||decoratedTextElement.innerText===undefined) {
+        decoratedTextElement.innerText = ' ';
+      }
+
+      completedTextElement.innerText += typedLetter;
+      textPosition++;
+      if (text[textPosition + 1] === ' ') {
+        unCompletedTextElement.innerText = '\xa0' + text.slice(textPosition + 1);
+      } else {
+        unCompletedTextElement.innerText = text.slice(textPosition + 1);
+      }
+
+    }
+  }
+
+  document.addEventListener('keydown', keyboardHandler);
+
+}
+
+function startGame() {
+  addGameEventListeners();
+
+  const bigTimerElement=document.querySelector('#game-page .bigTimer');
+  bigTimerElement.classList.add('display-none');
+
+  const smallTimer=document.querySelector('#game-page .smallTimer');
+  smallTimer.classList.remove('display-none');
+
+  const textElement = document.getElementsByClassName('text')[0];
+  textElement.classList.remove('display-none');
+}
+
+function smallTimer(timer) {
+  const smallTimer=document.querySelector('#game-page .smallTimer');
+
+  smallTimer.innerText=`${timer} second${timer>1?'s':''} left`;
+}
+
+function updateBars(users) {
+  users.forEach(user=>{
+    const userScale=findPlayer(user.username).parentNode.getElementsByClassName('successIndicator')[0];
+
+    const part = Math.floor((user.progress / text.length) * 100);
+
+    if(part===100){
+      userScale.style.background='green';
+      if(user.username===username){
+        socket.emit('PLAYER_FINISHED', activeRoomName);
+      }
+    }
+    userScale.style.width=`${part >= 0 ? part : 100}%`;
+  })
+}
+
+function finishGame(users) {
+  console.log(users)
 }

@@ -1,4 +1,5 @@
 export interface IUser {
     username:string,
-    isReady:boolean
+    isReady:boolean,
+    progress:number
 }

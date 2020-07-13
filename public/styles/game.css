@@ -10,6 +10,7 @@
 }
 
 .gameBlock{
+    position: relative;
     height: 400px;
     width:400px;
     border: 1px black solid;
@@ -77,4 +78,36 @@
 
 .gameUser .userName.you::after{
     content: ' (you)';
+}
+
+.bigTimer{
+    font-size: 50px;
+}
+
+.completedText {
+    background: lawngreen;
+}
+
+.decoratedText {
+    border-bottom: 2px solid lawngreen;
+}
+
+.text{
+    font-size: 0;
+}
+
+.text span{
+    font-size: 15px;
+}
+
+.smallTimer{
+    position: absolute;
+    top:0;
+    right: 0;
+}
+
+.successIndicator{
+    width: 0;
+    height: 100%;
+    background: #c7fc00;
 }
