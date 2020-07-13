@@ -94,43 +94,7 @@ export default (io: Server) => {
             user.isReady=true;
             socket.to(roomName).emit('PLAYER_STATUS_UPDATE', user);
 
-            if(isRoomReady(roomName)){
-                let bigTimer=config.SECONDS_TIMER_BEFORE_START_GAME;
-                let gameTimer=config.SECONDS_FOR_GAME;
-
-                io.emit('HIDE_ROOM', roomName)
-                io.in(roomName).emit('BIG_TIMER',bigTimer);
-                io.in(roomName).emit('TEXT_NUMBER',getRandomInt(textsSize));
-
-                let gameTimerId:NodeJS.Timeout;
-                const timerId=setInterval(()=>{
-                    bigTimer--;
-                    io.in(roomName).emit('BIG_TIMER',bigTimer);
-                    if(bigTimer===0){
-                        io.in(roomName).emit('GAME_TIMER',gameTimer);
-                        gameTimerId=setInterval(()=>{
-                            gameTimer--;
-                            io.in(roomName).emit('GAME_TIMER',gameTimer);
-                            if(gameTimer===0){
-                                io.in(roomName).emit('GAME_FINISHED', rooms.get(roomName));
-
-                                if(rooms.get(roomName)!.length!==config.MAXIMUM_USERS_FOR_ONE_ROOM){
-                                    io.emit('SHOW_ROOM', roomName)
-                                }
-
-                                finishGame(roomName);
-                                timers.delete(roomName);
-                                clearInterval(gameTimerId)
-                            }
-                        },1000)
-                        timers.delete(roomName);
-                        timers.set(roomName,gameTimerId);
-                        clearInterval(timerId);
-                    }
-                }, 1000);
-                timers.set(roomName,timerId)
-
-            }
+            startGameIfPossible(roomName);
         })
 
         socket.on('PLAYER_NOT_READY',(roomName:string):void=>{
@@ -187,7 +151,10 @@ export default (io: Server) => {
                     timers.delete(roomName);
                 }
                 rooms.delete(roomName);
+            }else if(!timers.has(roomName)){
+                startGameIfPossible(roomName);
             }
+
 
             io.emit('UPDATE_ROOMS', generateArray(rooms))
             hideRooms();
@@ -206,7 +173,46 @@ export default (io: Server) => {
             currentWinner.progress=notFinished.length-users.length-1;
 
         }
+        function startGameIfPossible(roomName:string):void{
+            if(isRoomReady(roomName)){
+                let bigTimer=config.SECONDS_TIMER_BEFORE_START_GAME;
+                let gameTimer=config.SECONDS_FOR_GAME;
 
+                io.emit('HIDE_ROOM', roomName)
+                io.in(roomName).emit('BIG_TIMER',bigTimer);
+                io.in(roomName).emit('TEXT_NUMBER',getRandomInt(textsSize));
+
+                let gameTimerId:NodeJS.Timeout;
+                const timerId=setInterval(()=>{
+                    bigTimer--;
+                    io.in(roomName).emit('BIG_TIMER',bigTimer);
+                    if(bigTimer===0){
+                        io.in(roomName).emit('GAME_TIMER',gameTimer);
+                        gameTimerId=setInterval(()=>{
+                            gameTimer--;
+                            io.in(roomName).emit('GAME_TIMER',gameTimer);
+                            if(gameTimer===0){
+                                io.in(roomName).emit('GAME_FINISHED', rooms.get(roomName));
+
+                                if(rooms.get(roomName)!.length!==config.MAXIMUM_USERS_FOR_ONE_ROOM){
+                                    io.emit('SHOW_ROOM', roomName)
+                                }
+
+                                finishGame(roomName);
+                                timers.delete(roomName);
+                                clearInterval(gameTimerId)
+                            }
+                        },1000)
+                        timers.delete(roomName);
+                        timers.set(roomName,gameTimerId);
+                        clearInterval(timerId);
+                    }
+                }, 1000);
+                timers.set(roomName,timerId)
+
+            }
+
+        }
         function finishGame(roomName:string):void {
             rooms.get(roomName)!.forEach(user=>{
                 user.isReady=false;
