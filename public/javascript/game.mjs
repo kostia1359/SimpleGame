@@ -260,6 +260,7 @@ function addGameEventListeners() {
   keyboardHandler=function (keyEvent) {
     if (keyEvent.repeat) return;
     if (keyEvent.key.toLowerCase() === text[textPosition].toLowerCase()) {
+      console.log(keyEvent.key);
       socket.emit('SUCCESSFUL_LETTER', activeRoomName)
       let typedLetter = decoratedTextElement.innerText === '\xa0' ? ' ' : decoratedTextElement.innerText;
       decoratedTextElement.innerText = text[textPosition + 1] === ' ' ? '\xa0' : text[textPosition + 1];
@@ -330,6 +331,7 @@ function badUserName() {
 }
 
 function finishGame(users) {
+  document.removeEventListener('keydown',keyboardHandler);
 
   showWinner();
 
