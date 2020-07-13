@@ -1,4 +1,5 @@
 import {createElement} from "./helpers/domHelper.mjs";
+import {showModal} from "./helpers/modal.mjs";
 
 const username = sessionStorage.getItem("username");
 
@@ -239,7 +240,7 @@ function bigTimer(timer) {
 }
 
 function getText(textNumber) {
-  fetch(`http://localhost:3003/game/texts/${textNumber}`).then(res=>res.json()).then(res=>{
+  fetch(`http://localhost:3002/game/texts/${textNumber}`).then(res=>res.json()).then(res=>{
     text=res.text;
   })
 }
@@ -307,6 +308,10 @@ function updateBars(users) {
 
     const part = Math.floor((user.progress / text.length) * 100);
 
+    if(part===0){
+      userScale.style.background='#c7fc00';
+
+    }
     if(part===100){
       userScale.style.background='green';
       if(user.username===username){
@@ -325,7 +330,48 @@ function badUserName() {
 }
 
 function finishGame(users) {
-  console.log(users)
+
+  showWinner();
+
+  function showWinner() {
+    const ol=createElement({tagName:'ol'});
+
+    users.filter(user=>user.progress<0)
+        .sort((user1,user2)=>user2.progress-user1.progress)
+        .forEach(createUser);
+
+    users.filter(user=>user.progress>=0)
+        .sort((user1,user2)=>user2.progress-user1.progress)
+        .forEach(createUser);
+
+    showModal({
+      title:"Congratulation",
+      bodyElement:ol,
+      onClose:showButton
+    })
+
+    function showButton() {
+      const returnButton=document.querySelector('#game-page .returnButton');
+      returnButton.classList.remove('display-none');
+
+      const smallTimer=document.querySelector('#game-page .smallTimer');
+      smallTimer.classList.add('display-none');
+
+      const textElement = document.getElementsByClassName('text')[0];
+      textElement.classList.add('display-none');
+
+      const completedTextElement = textElement.getElementsByClassName('completedText')[0]
+      completedTextElement.innerText='';
+
+      const readyButton=document.querySelector('#game-page .readyButton');
+      readyButton.classList.remove('display-none');
+    }
+    function createUser(user) {
+      const li=createElement({tagName:'li'});
+      li.innerText=user.username;
+      ol.append(li);
+    }
+  }
 }
 
 function findRoom(roomName) {
@@ -339,12 +385,10 @@ function findRoom(roomName) {
 }
 
 function hideRoom(roomName) {
-  console.log('hiding');
   findRoom(roomName).classList.add('display-none');
 }
 
 function showRoom(roomName) {
-  console.log('showing');
 
   findRoom(roomName).classList.remove('display-none');
 }

@@ -59,6 +59,8 @@ export default (io: Server) => {
 
         socket.emit('UPDATE_ROOMS', generateArray(rooms));
 
+        hideRoomsSelf();
+
         socket.on('JOIN_ROOM', (roomName: string) => {
             if(rooms.get(roomName)===undefined){
                 rooms.set(roomName, [])
@@ -69,6 +71,7 @@ export default (io: Server) => {
 
             socket.emit('JOIN_ROOM_DONE', {name:roomName,online:rooms.get(roomName)})
             io.emit('UPDATE_ROOMS', generateArray(rooms));
+            hideRooms();
             socket.to(roomName).emit('PLAYER_JOINED', username);
 
             if(rooms.get(roomName)!.length===config.MAXIMUM_USERS_FOR_ONE_ROOM){
@@ -115,6 +118,8 @@ export default (io: Server) => {
                                     io.emit('SHOW_ROOM', roomName)
                                 }
 
+                                finishGame(roomName);
+                                timers.delete(roomName);
                                 clearInterval(gameTimerId)
                             }
                         },1000)
@@ -156,6 +161,7 @@ export default (io: Server) => {
                 if(rooms.get(roomName)!.length!==config.MAXIMUM_USERS_FOR_ONE_ROOM){
                     io.emit('SHOW_ROOM', roomName)
                 }
+                finishGame(roomName);
             }
         });
 
@@ -178,11 +184,13 @@ export default (io: Server) => {
                 if(timers.has(roomName)){
                     const timer=timers.get(roomName);
                     clearInterval(timer!);
+                    timers.delete(roomName);
                 }
                 rooms.delete(roomName);
             }
 
             io.emit('UPDATE_ROOMS', generateArray(rooms))
+            hideRooms();
         }
         function isRoomReady(roomName:string) {
             const unReady=rooms.get(roomName)!.filter(user=>!user.isReady);
@@ -197,6 +205,38 @@ export default (io: Server) => {
 
             currentWinner.progress=notFinished.length-users.length-1;
 
+        }
+
+        function finishGame(roomName:string):void {
+            rooms.get(roomName)!.forEach(user=>{
+                user.isReady=false;
+                user.progress=0;
+
+                io.in(roomName).emit('PLAYER_STATUS_UPDATE', user);
+            })
+            io.in(roomName).emit('UPDATE_BARS', rooms.get(roomName));
+        }
+        function hideRoomsSelf():void {
+            rooms.forEach((users,roomName)=>{
+                if(users.length===config.MAXIMUM_USERS_FOR_ONE_ROOM){
+                    socket.emit('HIDE_ROOM', roomName);
+                }
+            })
+
+            timers.forEach((timer, roomName)=>{
+                socket.emit('HIDE_ROOM', roomName);
+            })
+        }
+        function hideRooms():void {
+            rooms.forEach((users,roomName)=>{
+                if(users.length===config.MAXIMUM_USERS_FOR_ONE_ROOM){
+                    io.emit('HIDE_ROOM', roomName);
+                }
+            })
+
+            timers.forEach((timer, roomName)=>{
+                io.emit('HIDE_ROOM', roomName);
+            })
         }
     });
 
