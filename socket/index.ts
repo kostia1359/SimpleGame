@@ -115,16 +115,6 @@ export default (io: Server) => {
             setNextWinner(roomName);
 
             if(isGameEnd(users)){
-                const timer=timers.get(roomName);
-
-                clearInterval(timer!);
-                timers.delete(roomName);
-
-                io.in(roomName).emit('GAME_FINISHED', users);
-
-                if(rooms.get(roomName)!.length!==config.MAXIMUM_USERS_FOR_ONE_ROOM){
-                    io.emit('SHOW_ROOM', roomName)
-                }
                 finishGame(roomName);
             }
         });
@@ -151,8 +141,14 @@ export default (io: Server) => {
                     timers.delete(roomName);
                 }
                 rooms.delete(roomName);
-            }else if(!timers.has(roomName)){
-                startGameIfPossible(roomName);
+            }else {
+                if (!timers.has(roomName)) {
+                    startGameIfPossible(roomName);
+                }else{
+                    if(isGameEnd(rooms.get(roomName)!)){
+                        finishGame(roomName);
+                    }
+                }
             }
 
 
@@ -192,15 +188,7 @@ export default (io: Server) => {
                             gameTimer--;
                             io.in(roomName).emit('GAME_TIMER',gameTimer);
                             if(gameTimer===0){
-                                io.in(roomName).emit('GAME_FINISHED', rooms.get(roomName));
-
-                                if(rooms.get(roomName)!.length!==config.MAXIMUM_USERS_FOR_ONE_ROOM){
-                                    io.emit('SHOW_ROOM', roomName)
-                                }
-
-                                finishGame(roomName);
-                                timers.delete(roomName);
-                                clearInterval(gameTimerId)
+                                finishGame(roomName)
                             }
                         },1000)
                         timers.delete(roomName);
@@ -214,6 +202,14 @@ export default (io: Server) => {
 
         }
         function finishGame(roomName:string):void {
+            const users=rooms.get(roomName)!;
+            io.in(roomName).emit('GAME_FINISHED', users);
+
+            if(rooms.get(roomName)!.length!==config.MAXIMUM_USERS_FOR_ONE_ROOM){
+                io.emit('SHOW_ROOM', roomName)
+            }
+
+
             rooms.get(roomName)!.forEach(user=>{
                 user.isReady=false;
                 user.progress=0;
@@ -221,6 +217,11 @@ export default (io: Server) => {
                 io.in(roomName).emit('PLAYER_STATUS_UPDATE', user);
             })
             io.in(roomName).emit('UPDATE_BARS', rooms.get(roomName));
+
+            const timer=timers.get(roomName);
+
+            clearInterval(timer!);
+            timers.delete(roomName);
         }
         function hideRoomsSelf():void {
             rooms.forEach((users,roomName)=>{
