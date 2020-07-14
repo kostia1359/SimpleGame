@@ -1,9 +1,11 @@
-Starter for **HTTP, REST / WS** homework. Binary Studio Academy
+Keyboard racing games, that updates in real time
 
 ## Installation
 
-`yarn install`
+`npm install`
 
-`yarn start`
+`npx tsc`
+
+`npm run server`
 
 open http://localhost:3002/
