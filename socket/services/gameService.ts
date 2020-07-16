@@ -97,10 +97,10 @@ class GameService extends BaseService {
         timers.delete(roomName);
     }
 
-    isGameFinished(users:IUser[]):boolean {
-        const notFinished=users.filter(user=>user.progress>-1);
+    isGameFinished(users: IUser[]): boolean {
+        const notFinished = users.filter(user => user.progress > -1);
 
-        return notFinished.length===0;
+        return notFinished.length === 0;
     }
 
 }

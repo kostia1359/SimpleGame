@@ -19,6 +19,15 @@ class RoomsService extends BaseService{
         this.gameService=new GameService(Server);
     }
 
+    addUser(roomName:string){
+        if (rooms.get(roomName) === undefined) {
+            rooms.set(roomName, [])
+        }
+        rooms.get(roomName)!.push({username:this.username, isReady: false, progress: 0});
+
+        this.server.socket.join(roomName);
+    }
+
     deleteUser(roomName:string, userName:string){
         const users=rooms.get(roomName);
         const index=userService.findIndex(userName,roomName);
