@@ -8,7 +8,7 @@ if (!username) {
 
 const socket = io("", {query: {username}});
 
-const main=new Main(socket);
+const main = new Main(socket);
 
 main.prepareMainPage();
 

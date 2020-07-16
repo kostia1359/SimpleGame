@@ -5,13 +5,13 @@ import EventFactory from "../events/eventFactoty.mjs";
 
 class Main {
     constructor(socket) {
-        this.socket=socket;
+        this.socket = socket;
     }
 
-    createEventListeners=()=> {
-        const username=sessionStorage.getItem("username");
-        const playerView=new Player();
-        const socket=this.socket;
+    createEventListeners = () => {
+        const username = sessionStorage.getItem("username");
+        const playerView = new Player();
+        const socket = this.socket;
 
         const returnButton = document.querySelector('#game-page .returnButton');
         returnButton.addEventListener('click', returnButtonEvent);
@@ -65,21 +65,21 @@ class Main {
         }
     }
 
-    addSubscriptions=()=>{
-        const roomEvents=new EventFactory('room',this.socket);
-        const gameEvents=new EventFactory('game',this.socket);
+    addSubscriptions = () => {
+        const roomEvents = new EventFactory('room', this.socket);
+        const gameEvents = new EventFactory('game', this.socket);
 
         subscriptionHelper.build(this.socket);
         roomEvents.addNotifications();
         gameEvents.addNotifications();
     }
 
-    enableInitialNotifications(){
+    enableInitialNotifications() {
         subscriptionHelper.setNotifications('room');
 
     }
 
-    prepareMainPage=()=>{
+    prepareMainPage = () => {
         this.addSubscriptions();
         this.enableInitialNotifications();
         this.createEventListeners();

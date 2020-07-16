@@ -6,21 +6,22 @@ import {findPlayer, findRoom} from "../helpers/finders.mjs";
 import Player from "../components/player.mjs";
 import Event from "./event.mjs";
 
-class RoomEvents extends Event{
+class RoomEvents extends Event {
     constructor(socket) {
         super(socket);
     }
-    create=(rooms)=> {
+
+    create = (rooms) => {
         const roomContainer = document.getElementById('roomsWrapper');
-        const createCard=createRoomCard.bind(this,this.socket.emit.bind(this.socket));
+        const createCard = createRoomCard.bind(this, this.socket.emit.bind(this.socket));
 
         roomNames.splice(0, roomNames.length);
         const allRooms = rooms.map(createCard);
         roomContainer.innerHTML = "";
         roomContainer.append(...allRooms);
     }
-    joinDone=(room)=> {
-        const playerView=new Player();
+    joinDone = (room) => {
+        const playerView = new Player();
         const game = document.getElementById('game-page');
         const rooms = document.getElementById('rooms-page');
 
@@ -55,7 +56,7 @@ class RoomEvents extends Event{
         window.location.replace("/login");
     }
 
-    addNotifications=()=> {
+    addNotifications = () => {
         subscriptionHelper.createGroup('room');
 
         subscriptionHelper.selectGroup('room').set("BAD_USERNAME", this.badUserName);

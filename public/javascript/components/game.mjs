@@ -8,17 +8,17 @@ class Game {
     constructor(socket, username) {
         this.socket = socket;
         this.username = username;
-        this.text='';
-        this.keyboardHandler=undefined;
+        this.text = '';
+        this.keyboardHandler = undefined;
     }
 
-    getText=(textNumber)=> {
+    getText = (textNumber) => {
         fetch(`http://localhost:3003/game/texts/${textNumber}`).then(res => res.json()).then(res => {
             this.text = res.text;
         })
     }
 
-    start=()=> {
+    start = () => {
         this.addGameEventListeners();
 
         const bigTimerElement = document.querySelector('#game-page .bigTimer');
@@ -29,7 +29,7 @@ class Game {
         showElements(smallTimer, textElement);
     }
 
-    finish=(users)=> {
+    finish = (users) => {
         document.removeEventListener('keydown', this.keyboardHandler);
 
         showWinner();
@@ -79,10 +79,10 @@ class Game {
         }
     }
 
-    addGameEventListeners=()=> {
+    addGameEventListeners = () => {
         let textPosition = 0;
-        const text=this.text;
-        const socket=this.socket
+        const text = this.text;
+        const socket = this.socket
 
         const textElement = document.getElementsByClassName('text')[0];
 
@@ -98,6 +98,7 @@ class Game {
             if (keyEvent.key.toLowerCase() === text[textPosition].toLowerCase()) {
                 socket.emit('SUCCESSFUL_LETTER')
                 fillTypedText();
+
                 function fillTypedText() {
                     const typedLetter = decoratedTextElement.innerText === '\xa0' ? ' ' : decoratedTextElement.innerText;
                     decoratedTextElement.innerText = text[textPosition + 1] === ' ' ? '\xa0' : text[textPosition + 1];
@@ -121,7 +122,7 @@ class Game {
 
     }
 
-    updateBars=(users)=> {
+    updateBars = (users) => {
         users.forEach(user => {
             const userScale = findPlayer(user.username).parentNode.getElementsByClassName('successIndicator')[0];
             const part = Math.floor((user.progress / this.text.length) * 100);

@@ -1,7 +1,7 @@
 import {findPlayer} from "../helpers/finders.mjs";
 import {createUser} from "./user.mjs";
 
-class Player{
+class Player {
     constructor() {
         this.userContainer = document.querySelector('#game-page .gameUsersWrapper');
     }
@@ -23,7 +23,7 @@ class Player{
         player.parentNode.parentNode.removeChild(player.parentNode);
     }
 
-    addPlayer=(userName)=> {
+    addPlayer = (userName) => {
         this.userContainer.append(createUser(userName));
     }
 }

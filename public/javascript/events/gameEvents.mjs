@@ -4,14 +4,14 @@ import Game from "../components/game.mjs";
 import Player from "../components/player.mjs";
 import {hideAndShowElement} from "../helpers/classListHelper.mjs";
 
-class GameEvents extends Event{
+class GameEvents extends Event {
     constructor(socket) {
         super(socket);
-        this.playerView=new Player();
-        this.gameView=new Game(socket, this.username);
+        this.playerView = new Player();
+        this.gameView = new Game(socket, this.username);
     }
 
-    preGameTimer=(timer)=> {
+    preGameTimer = (timer) => {
         const timerElement = document.querySelector('#game-page .bigTimer');
         const notReadyButton = document.getElementsByClassName('readyButton')[1];
 
@@ -26,13 +26,13 @@ class GameEvents extends Event{
         }
     }
 
-    gameTimer=(timer)=> {
+    gameTimer = (timer) => {
         const smallTimer = document.querySelector('#game-page .smallTimer');
 
         smallTimer.innerText = `${timer} second${timer > 1 ? 's' : ''} left`;
     }
 
-    addNotifications=()=> {
+    addNotifications = () => {
         subscriptionHelper.createGroup('game');
 
         subscriptionHelper.selectGroup('game').set('PLAYER_STATUS_UPDATE', this.playerView.changeStatus);

@@ -1,10 +1,11 @@
 class Event {
     constructor(socket) {
-        this.socket=socket;
+        this.socket = socket;
         this.username = sessionStorage.getItem("username");
     }
 
-    addNotifications(){}
+    addNotifications() {
+    }
 }
 
 export default Event;

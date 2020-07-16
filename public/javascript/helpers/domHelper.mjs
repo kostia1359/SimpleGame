@@ -1,4 +1,4 @@
-export function createElement({ tagName, className, attributes = {} }) {
+export function createElement({tagName, className, attributes = {}}) {
     const element = document.createElement(tagName);
 
     if (className) {
@@ -13,7 +13,7 @@ export function createElement({ tagName, className, attributes = {} }) {
 
 export function createDivElement({className, attributes = {}}) {
     return createElement({
-        tagName:'div',
+        tagName: 'div',
         className,
         attributes
     })
