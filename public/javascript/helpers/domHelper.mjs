@@ -10,3 +10,11 @@ export function createElement({ tagName, className, attributes = {} }) {
 
     return element;
 }
+
+export function createDivElement({className, attributes = {}}) {
+    return createElement({
+        tagName:'div',
+        className,
+        attributes
+    })
+}

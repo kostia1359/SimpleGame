@@ -57,7 +57,6 @@ class GameService extends BaseService {
     }
 
     startGameIfPossible(roomName: string): void {
-        console.log(this.areAllPlayersReady(roomName));
         if (this.areAllPlayersReady(roomName)) {
             this.startGame(roomName);
         }

@@ -1,5 +1,6 @@
-import {createElement} from "./helpers/domHelper.mjs";
+import {createElement, createDivElement} from "./helpers/domHelper.mjs";
 import {showModal} from "./helpers/modal.mjs";
+import {roomNames} from "./data.mjs";
 
 const username = sessionStorage.getItem("username");
 
@@ -13,7 +14,6 @@ let text;
 let keyboardHandler;
 
 
-const roomNames = [];//changing while updating
 const userContainer = document.querySelector('#game-page .gameUsersWrapper');
 const roomContainer = document.getElementById('roomsWrapper');
 const rooms = document.getElementById('rooms-page');
@@ -39,6 +39,8 @@ socketGameEvents.set('GAME_FINISHED', finishGame);
 
 const createRoom = () => {
     const roomName = prompt('input room name:');
+    console.log(!roomName);
+    if (!roomName) return;
 
     if (roomNames.indexOf(roomName) !== -1) {
         alert('you can not create room with existing name');
@@ -78,10 +80,10 @@ function createRoomCard(room) {
     const roomName = room.name;
     roomNames.push(roomName);
 
-    const roomElement = createElement({
-        tagName: 'div',
+    const roomElement=createDivElement({
         className: 'room'
-    });
+    })
+    console.log(roomElement);
 
     const roomUsers = createElement({
         tagName: 'div',
