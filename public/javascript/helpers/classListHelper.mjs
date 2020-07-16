@@ -9,3 +9,8 @@ export function showElements(...elementsToShow) {
         element.classList.remove('display-none');
     })
 }
+
+export function hideAndShowElement(elementToHide, elementToShow) {
+    elementToHide.classList.add('display-none');
+    elementToShow.classList.remove('display-none');
+}

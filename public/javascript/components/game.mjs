@@ -82,6 +82,7 @@ class Game {
     addGameEventListeners=()=> {
         let textPosition = 0;
         const text=this.text;
+        const socket=this.socket
 
         const textElement = document.getElementsByClassName('text')[0];
 
@@ -95,7 +96,7 @@ class Game {
         this.keyboardHandler = function (keyEvent) {
             if (keyEvent.repeat) return;
             if (keyEvent.key.toLowerCase() === text[textPosition].toLowerCase()) {
-                this.socket.emit('SUCCESSFUL_LETTER')
+                socket.emit('SUCCESSFUL_LETTER')
                 fillTypedText();
                 function fillTypedText() {
                     const typedLetter = decoratedTextElement.innerText === '\xa0' ? ' ' : decoratedTextElement.innerText;
