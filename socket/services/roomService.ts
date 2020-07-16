@@ -25,7 +25,7 @@ class RoomsService extends BaseService{
         }
         rooms.get(roomName)!.push({username:this.username, isReady: false, progress: 0});
 
-        this.server.socket.join(roomName);
+        this.server.socket.join(roomName, ()=>{});
     }
 
     deleteUser(roomName:string, userName:string){

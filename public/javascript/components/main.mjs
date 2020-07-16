@@ -22,6 +22,7 @@ class Main {
             socket.emit("LEAVE_ROOM");
 
             subscriptionHelper.removeNotifications('game');
+            subscriptionHelper.removeNotifications('bot');
             hideAndShowElement(game, rooms);
         }
 
@@ -68,10 +69,12 @@ class Main {
     addSubscriptions = () => {
         const roomEvents = new EventFactory('room', this.socket);
         const gameEvents = new EventFactory('game', this.socket);
+        const botEvents = new EventFactory('bot', this.socket);
 
         subscriptionHelper.build(this.socket);
-        roomEvents.addNotifications();
-        gameEvents.addNotifications();
+        [roomEvents,gameEvents,botEvents].forEach(event=>event.addNotifications());
+        // roomEvents.addNotifications();
+        // gameEvents.addNotifications();
     }
 
     enableInitialNotifications() {

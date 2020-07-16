@@ -26,6 +26,7 @@ class RoomEvents extends Event {
         const rooms = document.getElementById('rooms-page');
 
         subscriptionHelper.setNotifications('game');
+        subscriptionHelper.setNotifications('bot');
         hideAndShowElement(rooms, game);
         const userContainer = document.querySelector('#game-page .gameUsersWrapper');
         const {name: roomName, online} = room;

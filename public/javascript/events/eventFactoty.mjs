@@ -1,5 +1,6 @@
 import RoomEvents from "./roomEvents.mjs";
 import GameEvents from "./gameEvents.mjs";
+import BotEvents from "./botEvents.mjs";
 
 class EventFactory {
     constructor(type, socket) {
@@ -8,6 +9,9 @@ class EventFactory {
         }
         if (type === "game") {
             return new GameEvents(socket);
+        }
+        if (type === "bot") {
+            return new BotEvents(socket);
         }
     }
 }
