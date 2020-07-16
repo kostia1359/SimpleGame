@@ -24,7 +24,7 @@ class GameService extends BaseService {
 
         const timerId = setInterval(() => {
             bigTimer--;
-            this.emitHelper.selectRoom(roomName).notifyAll('BIG_TIMER', bigTimer);
+            this.emitHelper.selectRoom(roomName).notifyAll('PRE_GAME_TIMER', bigTimer);
             if (bigTimer === 0) {
                 this.emitHelper.selectRoom(roomName).notifyAll('GAME_TIMER', gameTimer);
                 const gameTimerId: NodeJS.Timeout = setInterval(() => {
@@ -47,8 +47,8 @@ class GameService extends BaseService {
         const textsSize = texts.length;
 
         this.emitHelper.notifyAll('HIDE_ROOM', roomName)
-        this.emitHelper.selectRoom(roomName).notifyAll('BIG_TIMER', config.SECONDS_TIMER_BEFORE_START_GAME);
-        this.emitHelper.selectRoom(roomName).notifyAll('TEXT_NUMBER', this.getRandomInt(textsSize));
+        this.emitHelper.selectRoom(roomName).notifyAll('PRE_GAME_TIMER', config.SECONDS_TIMER_BEFORE_START_GAME);
+        this.emitHelper.selectRoom(roomName).notifyAll('GET_RANDOM_TEXT_NUMBER', this.getRandomInt(textsSize));
 
     }
 
@@ -57,6 +57,7 @@ class GameService extends BaseService {
     }
 
     startGameIfPossible(roomName: string): void {
+        console.log(this.areAllPlayersReady(roomName));
         if (this.areAllPlayersReady(roomName)) {
             this.startGame(roomName);
         }
@@ -87,7 +88,7 @@ class GameService extends BaseService {
 
             this.emitHelper.selectRoom(roomName).notifyAll('PLAYER_STATUS_UPDATE', user);
         })
-        this.emitHelper.selectRoom(roomName).notifyAll('UPDATE_BARS', rooms.get(roomName));
+        this.emitHelper.selectRoom(roomName).notifyAll('PLAYER_PROGRESS_UPDATE', rooms.get(roomName));
     }
 
     private resetTimer(roomName: string): void {

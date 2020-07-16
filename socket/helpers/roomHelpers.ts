@@ -1,5 +1,7 @@
 import {IUser} from "../../types/user";
 import {IRoom} from "../../types/room";
+import {Socket} from "socket.io"
+import {rooms} from "../data";
 
 export const convertRoomsToArray = (roomsMap: Map<string, IUser[]>): IRoom[] => {
     const rooms: IRoom[] = [];
@@ -12,3 +14,5 @@ export const convertRoomsToArray = (roomsMap: Map<string, IUser[]>): IRoom[] => 
 
     return rooms;
 }
+
+export const getCurrentRoomId = (socket:Socket) => Object.keys(socket.rooms).find(roomId => rooms.has(roomId));

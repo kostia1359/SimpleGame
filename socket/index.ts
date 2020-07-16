@@ -7,6 +7,7 @@ import EmitHelper from "./helpers/emitHelper";
 import RoomViewService from "./services/roomViewService";
 import RoomsService from "./services/roomService";
 import PlayerEventsService from "./services/playerEventsService";
+import {getCurrentRoomId} from "./helpers/roomHelpers";
 
 export default (io: Server) => {
     io.on('connection', (socket: Socket) => {
@@ -45,7 +46,9 @@ export default (io: Server) => {
             }
         })
 
-        socket.on('LEAVE_ROOM', (roomName: string): void => {
+        socket.on('LEAVE_ROOM', (): void => {
+            const roomName = getCurrentRoomId(socket)!;
+
             emitHelper.selectRoom(roomName).notifyExceptSender('PLAYER_LEFT', username);
 
             if (rooms.get(roomName)!.length === config.MAXIMUM_USERS_FOR_ONE_ROOM - 1) {
