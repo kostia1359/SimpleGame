@@ -13,17 +13,22 @@ class EmitHelper {
         this.server=Server;
     }
 
-    notifyAll(event:string,data:any):void{
+    notifyAllClear(event:string,data:any):void{
         this.server.io.emit(event,data);
-        const sendData=(event:string,data:any)=>{
-            this.server.io.emit(event,data);
-        }
-        BotService.receiveNotification({
-            sendData,
-            data,
-            event
-        })
     }
+    notifyAll=new Proxy(this.notifyAllClear,{
+        apply(target: any, thisArg: any, argArray?: any): any {
+            target.apply(thisArg, argArray);
+            const sendData=(event:string,data:any)=>{
+                target.apply(thisArg,[event,data]);
+            }
+            BotService.receiveNotification({
+                sendData,
+                data:argArray[1],
+                event:argArray[0]
+            })
+        }
+    })
 
     notifyOwner(event:string,data?:any):void{
         this.server.socket.emit(event, data);
