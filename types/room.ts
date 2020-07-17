@@ -1,6 +1,6 @@
 import {IUser} from "./user";
 
 export interface IRoom {
-    name:string,
-    online:IUser[]
+    name: string,
+    online: IUser[]
 }

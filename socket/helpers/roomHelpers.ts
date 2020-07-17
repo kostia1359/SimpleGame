@@ -15,4 +15,4 @@ export const convertRoomsToArray = (roomsMap: Map<string, IUser[]>): IRoom[] => 
     return rooms;
 }
 
-export const getCurrentRoomId = (socket:Socket) => Object.keys(socket.rooms).find(roomId => rooms.has(roomId));
+export const getCurrentRoomId = (socket: Socket) => Object.keys(socket.rooms).find(roomId => rooms.has(roomId));

@@ -57,7 +57,7 @@ class PlayerEventsService extends BaseService {
         const player = userService.find(this.username, roomName);
 
         player!.progress++;
-        player!.lastSymbolDate=Date.now();
+        player!.lastSymbolDate = Date.now();
         this.emitHelper.selectRoom(roomName).notifyAll('PLAYER_PROGRESS_UPDATE', rooms.get(roomName));
     }
 }

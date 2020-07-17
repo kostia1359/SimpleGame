@@ -37,9 +37,9 @@ class BotService {
                     }, this.jokeDelay);
                     room.timers.push(jokeTimer);
 
-                    const regularTimer:NodeJS.Timeout=setInterval(()=>{
+                    const regularTimer: NodeJS.Timeout = setInterval(() => {
                         this.regularUpdate(notification.sendData, notification.roomName!);
-                    },this.regularNotificationTimeout)
+                    }, this.regularNotificationTimeout)
                     room.timers.push(regularTimer);
                 }
                 break;

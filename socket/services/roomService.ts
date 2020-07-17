@@ -6,45 +6,47 @@ import RoomViewService from "./roomViewService";
 import GameService from "./gameService";
 
 enum RoomConditions {
-    deleteRoom="deleteRoom",
-    startGame="startGame",
-    finishGame="finishGame",
-    nothingToDo="nothingToDo"
+    deleteRoom = "deleteRoom",
+    startGame = "startGame",
+    finishGame = "finishGame",
+    nothingToDo = "nothingToDo"
 }
 
-class RoomsService extends BaseService{
+class RoomsService extends BaseService {
     private gameService: GameService;
-    constructor(Server:IServer) {
+
+    constructor(Server: IServer) {
         super(Server);
-        this.gameService=new GameService(Server);
+        this.gameService = new GameService(Server);
     }
 
-    addUser(roomName:string){
+    addUser(roomName: string) {
         if (rooms.get(roomName) === undefined) {
             rooms.set(roomName, [])
         }
-        rooms.get(roomName)!.push({username:this.username, isReady: false, progress: 0, lastSymbolDate:Date.now()});
+        rooms.get(roomName)!.push({username: this.username, isReady: false, progress: 0, lastSymbolDate: Date.now()});
 
-        this.server.socket.join(roomName, ()=>{});
+        this.server.socket.join(roomName, () => {
+        });
     }
 
-    deleteUser(roomName:string, userName:string){
-        const users=rooms.get(roomName);
-        const index=userService.findIndex(userName,roomName);
+    deleteUser(roomName: string, userName: string) {
+        const users = rooms.get(roomName);
+        const index = userService.findIndex(userName, roomName);
 
-        if(index===-1) throw Error('-1');
+        if (index === -1) throw Error('-1');
 
-        users!.splice(index,1);
+        users!.splice(index, 1);
     };
 
-    leave(roomName:string):void {
-        this.deleteUser(roomName,this.username);
+    leave(roomName: string): void {
+        this.deleteUser(roomName, this.username);
 
         this.server.socket.leave(roomName);
-        const condition=this.detectCondition(roomName);
+        const condition = this.detectCondition(roomName);
         switch (condition) {
             case RoomConditions.deleteRoom:
-                if(timers.has(roomName)){
+                if (timers.has(roomName)) {
                     this.deleteTimer(roomName);
                 }
                 rooms.delete(roomName);
@@ -60,14 +62,14 @@ class RoomsService extends BaseService{
         RoomViewService.update(this.emitHelper.notifyAll.bind(this.emitHelper));
     }
 
-    private detectCondition(roomName:string):RoomConditions{
-        if(rooms.get(roomName)!.length===0){
+    private detectCondition(roomName: string): RoomConditions {
+        if (rooms.get(roomName)!.length === 0) {
             return RoomConditions.deleteRoom;
-        }else {
-            if (!timers.has(roomName)&&this.gameService.areAllPlayersReady(roomName)) {
+        } else {
+            if (!timers.has(roomName) && this.gameService.areAllPlayersReady(roomName)) {
                 return RoomConditions.startGame
-            }else{
-                if(this.gameService.isGameFinished(rooms.get(roomName)!)){
+            } else {
+                if (this.gameService.isGameFinished(rooms.get(roomName)!)) {
                     return RoomConditions.finishGame;
                 }
             }
@@ -75,14 +77,14 @@ class RoomsService extends BaseService{
         return RoomConditions.nothingToDo;
     }
 
-    private deleteTimer(roomName:string):void{
-        const timer=timers.get(roomName);
+    private deleteTimer(roomName: string): void {
+        const timer = timers.get(roomName);
         clearInterval(timer!);
         timers.delete(roomName);
 
-        const botTimers=botRooms.get(roomName)!.timers;
-        botTimers.forEach(timer=>clearInterval(timer));
-        botTimers.splice(0,botTimers.length);
+        const botTimers = botRooms.get(roomName)!.timers;
+        botTimers.forEach(timer => clearInterval(timer));
+        botTimers.splice(0, botTimers.length);
     }
 
 }
