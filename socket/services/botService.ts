@@ -15,7 +15,7 @@ class BotService {
         this.symbolsBeforeFinishNotification = 3;
         this.regularNotificationTimeout = 30 * 1000;
         this.epsilon = 100;
-        this.jokeDelay = 5000;
+        this.jokeDelay = 5500;
 
         this.textLength = 0;
     }
@@ -36,6 +36,11 @@ class BotService {
                         this.tellJoke(notification.sendData, notification.roomName!);
                     }, this.jokeDelay);
                     room.timers.push(jokeTimer);
+
+                    const regularTimer:NodeJS.Timeout=setInterval(()=>{
+                        this.regularUpdate(notification.sendData, notification.roomName!);
+                    },this.regularNotificationTimeout)
+                    room.timers.push(regularTimer);
                 }
                 break;
             case 'GET_RANDOM_TEXT_NUMBER':
@@ -79,6 +84,42 @@ class BotService {
     }
 
     endGame = (sendCb: Function, users: IUser[], roomName: string) => {
+        const winners: IUser[] = this.getWinners(users);
+
+        const commentary = [];
+        const room = botRooms.get(roomName)!;
+        for (let i = 0; i < 3 && i < winners.length; ++i) {
+            const user = winners[i];
+            if (user.progress >= 0) {
+                commentary.push(`игрок ${user.username} занял ${i + 1} место так и не закончив гонку`);
+            } else {
+                const time = user.lastSymbolDate - room.startRace!;
+                commentary.push(`игрок ${user.username} занял ${i + 1} место и потратил ${Math.floor(time / 1000)} секунд`);
+            }
+        }
+        sendCb('COMMENT', commentary.join(','));
+    }
+
+    regularUpdate = (sendCb: Function, roomName: string) => {
+        this.updateLastEventTime(roomName);
+        const users = rooms.get(roomName)!;
+        const winners = this.getWinners(users);
+
+        const notFinished: IUser[] = winners
+            .filter(user => user.progress > 0)
+            .sort((user1, user2) => user2.progress - user1.progress);
+        const commentary = [];
+        for (let i = 0; i < winners.length; ++i) {
+            commentary.push(`${winners[i].username} сейчас на ${i + 1} месте`);
+        }
+        if (notFinished.length > 1) {
+            commentary.push(`между ${notFinished[0].username} и ${notFinished[1].username} сейчас ${Math.abs(notFinished[0].progress - notFinished[1].progress)}`);
+        }
+
+        sendCb('COMMENT', commentary.join(','));
+    }
+
+    private getWinners = (users: IUser[]): IUser[] => {
         const winners: IUser[] = [];
         users.filter(user => user.progress < 0)
             .sort((user1, user2) => user2.progress - user1.progress)
@@ -88,14 +129,7 @@ class BotService {
             .sort((user1, user2) => user2.progress - user1.progress)
             .forEach(user => winners.push(user));
 
-        const commentary = [];
-        const room = botRooms.get(roomName)!;
-        for (let i = 0; i < 3 && i < winners.length; ++i) {
-            const user = winners[i];
-            const time = user.progress > 0 ? Date.now() - room.startRace! : user.lastSymbolDate - room.startRace!;
-            commentary.push(`игрок ${user.username} занял ${i + 1} место и потратил ${Math.floor(time / 1000)} секунд`);
-        }
-        sendCb('COMMENT', commentary.join(','));
+        return winners;
     }
 
     sayHello = (sendCb: Function) => {

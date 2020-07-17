@@ -13,7 +13,7 @@ class Game {
     }
 
     getText = (textNumber) => {
-        fetch(`http://localhost:3003/game/texts/${textNumber}`).then(res => res.json()).then(res => {
+        fetch(`http://localhost:3002/game/texts/${textNumber}`).then(res => res.json()).then(res => {
             this.text = res.text;
         })
     }
@@ -31,51 +31,25 @@ class Game {
 
     finish = (users) => {
         document.removeEventListener('keydown', this.keyboardHandler);
+        resetView();
+        function resetView() {
+            hideGameElements();
+            showControlElements();
+        }
 
-        showWinner();
+        function hideGameElements() {
+            const smallTimer = document.querySelector('#game-page .smallTimer');
+            const textElement = document.getElementsByClassName('text')[0];
+            hideElements(smallTimer, textElement);
 
-        function showWinner() {
-            const ol = createElement({tagName: 'ol'});
+            const completedTextElement = textElement.getElementsByClassName('completedText')[0]
+            completedTextElement.innerText = '';
+        }
 
-            users.filter(user => user.progress < 0)
-                .sort((user1, user2) => user2.progress - user1.progress)
-                .forEach(createWinnerModal);
-
-            users.filter(user => user.progress >= 0)
-                .sort((user1, user2) => user2.progress - user1.progress)
-                .forEach(createWinnerModal);
-
-            showModal({
-                title: "Congratulation",
-                bodyElement: ol,
-                onClose: resetView
-            })
-
-            function resetView() {
-                hideGameElements();
-                showControlElements();
-            }
-
-            function hideGameElements() {
-                const smallTimer = document.querySelector('#game-page .smallTimer');
-                const textElement = document.getElementsByClassName('text')[0];
-                hideElements(smallTimer, textElement);
-
-                const completedTextElement = textElement.getElementsByClassName('completedText')[0]
-                completedTextElement.innerText = '';
-            }
-
-            function showControlElements() {
-                const returnButton = document.querySelector('#game-page .returnButton');
-                const readyButton = document.querySelector('#game-page .readyButton');
-                showElements(returnButton, readyButton);
-            }
-
-            function createWinnerModal(user) {
-                const li = createElement({tagName: 'li'});
-                li.innerText = user.username;
-                ol.append(li);
-            }
+        function showControlElements() {
+            const returnButton = document.querySelector('#game-page .returnButton');
+            const readyButton = document.querySelector('#game-page .readyButton');
+            showElements(returnButton, readyButton);
         }
     }
 
