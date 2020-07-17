@@ -1,6 +1,5 @@
 import {IServer} from "../../types/server";
 import BotService from "../services/botService";
-import {INotification} from "../../types/notification";
 
 interface IRoomNotification {
     notifyAll:Function,
@@ -10,38 +9,44 @@ interface IRoomNotification {
 
 class EmitHelper {
     private readonly server: IServer;
-    private readonly botService: BotService;
     constructor(Server:IServer) {
         this.server=Server;
-        this.botService=new BotService();
     }
 
-    notifyAll=(event:string,data:any):void=>{
+    notifyAll(event:string,data:any):void{
         this.server.io.emit(event,data);
-        this.botService.receiveNotification({
-            sendData:this.server.io.emit.bind(this.server.io),
+        const sendData=(event:string,data:any)=>{
+            this.server.io.emit(event,data);
+        }
+        BotService.receiveNotification({
+            sendData,
             data,
             event
         })
     }
 
-    notifyOwner=(event:string,data?:any):void=>{
+    notifyOwner(event:string,data?:any):void{
         this.server.socket.emit(event, data);
-        this.botService.receiveNotification({
-            sendData:this.server.socket.emit.bind(this.server.socket),
+        const sendData=(event:string,data:any)=>{
+            this.server.socket.emit(event, data);
+        }
+        BotService.receiveNotification({
+            sendData,
             data,
             event
         })
     }
 
-    selectRoom=(roomName:string):IRoomNotification=>{
-        const botService=this.botService;
+    selectRoom(roomName:string):IRoomNotification{
         const server=this.server;
         return {notifyAll,notifyExceptSender};
         function notifyExceptSender(event:string,data?:any) {
             server.socket.to(roomName).emit(event,data);
-            botService.receiveNotification({
-                sendData:server.socket.to(roomName).emit.bind(server.socket.to(roomName)),
+            const sendData=(event:string,data:any)=>{
+                server.socket.to(roomName).emit(event,data);
+            }
+            BotService.receiveNotification({
+                sendData,
                 data,
                 roomName,
                 event
@@ -49,8 +54,11 @@ class EmitHelper {
         }
         function notifyAll(event:string,data?:any) {
             server.io.in(roomName).emit(event,data);
-            botService.receiveNotification({
-                sendData:server.io.in(roomName).emit.bind(server.io.in(roomName)),
+            const sendData=(event:string,data:any)=>{
+                server.io.in(roomName).emit(event,data);
+            }
+            BotService.receiveNotification({
+                sendData,
                 data,
                 roomName,
                 event

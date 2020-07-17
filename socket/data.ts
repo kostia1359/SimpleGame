@@ -1,9 +1,10 @@
 import {IUser} from "../types/user";
 
 interface roomData {
-    timer?:NodeJS.Timeout[],
+    timers:NodeJS.Timeout[],
     textLength:number,
     lastEventTime:number,
+    startRace?:number
 }
 
 export const usernames:string[]=[];

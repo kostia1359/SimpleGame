@@ -1,4 +1,4 @@
-import {rooms, timers} from "../data";
+import {botRooms, rooms, timers} from "../data";
 import {IServer} from "../../types/server";
 import userService from "./userService";
 import BaseService from "./baseService";
@@ -79,6 +79,10 @@ class RoomsService extends BaseService{
         const timer=timers.get(roomName);
         clearInterval(timer!);
         timers.delete(roomName);
+
+        const botTimers=botRooms.get(roomName)!.timers;
+        botTimers.forEach(timer=>clearInterval(timer));
+        botTimers.splice(0,botTimers.length);
     }
 
 }
