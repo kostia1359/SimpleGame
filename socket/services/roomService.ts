@@ -23,7 +23,7 @@ class RoomsService extends BaseService{
         if (rooms.get(roomName) === undefined) {
             rooms.set(roomName, [])
         }
-        rooms.get(roomName)!.push({username:this.username, isReady: false, progress: 0});
+        rooms.get(roomName)!.push({username:this.username, isReady: false, progress: 0, lastSymbolDate:Date.now()});
 
         this.server.socket.join(roomName, ()=>{});
     }

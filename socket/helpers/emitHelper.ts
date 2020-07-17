@@ -13,7 +13,7 @@ class EmitHelper {
     private readonly botService: BotService;
     constructor(Server:IServer) {
         this.server=Server;
-        this.botService=new BotService(Server);
+        this.botService=new BotService();
     }
 
     notifyAll=(event:string,data:any):void=>{

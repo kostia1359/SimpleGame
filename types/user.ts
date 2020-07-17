@@ -1,5 +1,6 @@
 export interface IUser {
     username:string,
     isReady:boolean,
-    progress:number
+    progress:number,
+    lastSymbolDate:number
 }
